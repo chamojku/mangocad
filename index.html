@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mango CAD</title>
+<meta name="theme-color" content="#0e1013">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mango CAD">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  html,body{margin:0;height:100%;background:#0e1013;overflow:hidden}
+  body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);box-sizing:border-box}
+  iframe{display:block;width:100%;height:100%;border:0;background:#0e1013}
+  .loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#8b93a1;
+    font:15px system-ui,-apple-system,sans-serif;pointer-events:none;transition:opacity .3s}
+</style>
+</head>
+<body>
+<div class="loading" id="loading">🥭 Loading…</div>
+<iframe id="app" title="Mango CAD" allow="clipboard-write"></iframe>
+<script>
+  // ▼▼▼ Paste your Apps Script web app link here (the one ending in /exec) ▼▼▼
+  const APP_URL = 'PASTE_YOUR_EXEC_LINK_HERE';
+  // ▲▲▲
+
+  const frame = document.getElementById('app');
+  frame.addEventListener('load', () => { document.getElementById('loading').style.opacity = 0; });
+  frame.src = APP_URL;
+
+  // Keeps "Remember this device" working on iPhone: the PIN is saved here on mangocad.com
+  // and handed only to your Apps Script page (Google's script sandbox), never to any other site.
+  const store = {
+    get(){ try { return localStorage.getItem('mango.pin'); } catch { return null; } },
+    set(v){ try { v ? localStorage.setItem('mango.pin', v) : localStorage.removeItem('mango.pin'); } catch {} }
+  };
+  const FROM_APP = /^https:\/\/[a-z0-9-]+-script\.googleusercontent\.com$/;
+  window.addEventListener('message', e => {
+    if (!FROM_APP.test(e.origin) || !e.data || typeof e.data !== 'object') return;
+    if (e.data.type === 'mango-ready')  e.source.postMessage({ type: 'mango-pin', pin: store.get() }, e.origin);
+    if (e.data.type === 'mango-save')   store.set(e.data.pin);
+    if (e.data.type === 'mango-forget') store.set(null);
+  });
+</script>
+</body>
+</html>
